@@ -20,10 +20,9 @@
     </figure>`
   }
 
-  function addImage() {
-    const data = JSON.parse(this.responseText);
-    if (data && data.results && data.results[0]) {
-      const firstImage = data.results[0];
+  function addImage(images) {
+    if (images && images.results && images.results[0]) {
+      const firstImage = images.results[0];
       htmlContent = figTemplate({
         src: firstImage.urls.regular,
         searcedText: searchedForText,
@@ -40,12 +39,14 @@
   }
 
   function fetchSearchedText () {
-    const unsplashRequest = new XMLHttpRequest();
-    unsplashRequest.open('GET', `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`);
-    unsplashRequest.setRequestHeader('Authorization', `Client-ID ${unsplash}`);
-    unsplashRequest.onload = addImage;
-    unsplashRequest.onerror = handleImageError;
-    unsplashRequest.send();
+    $.ajax({
+      url: `https://api.unsplash.com/search/photos?page=1&query=${searchedForText}`,
+      headers: {
+        'Authorization': `Client-ID ${unsplash}`
+      },
+    })
+      .done(addImage)
+      .error(handleImageError)
   }
 
   function articlesTemplate (docs) {
@@ -62,16 +63,14 @@
     return '<div className="error-no-articles">No articles available</div>'
   }
 
-  function addArticles () {
-    const data = JSON.parse(this.responseText);
-    const htmlContent = articlesTemplate(data.response.docs || []);
+  function addArticles (articles) {
+    const htmlContent = articlesTemplate(articles.response.docs || []);
     responseContainer.insertAdjacentHTML('beforeend', htmlContent);
   }
   function fetchNytArticle() {
-    const articleRequest = new XMLHttpRequest();
-    articleRequest.onload = addArticles;
-    articleRequest.open('GET', `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=${nyt}`);
-    articleRequest.send();
+    $.ajax({
+      url: `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchedForText}&api-key=${nyt}`
+    }).done(addArticles)
   }
 
 })();
