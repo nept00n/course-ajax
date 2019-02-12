@@ -21,14 +21,21 @@
     fetch(url, opts)
       .then((res) => res.json())
       .then((res) => addImage(res, responseContainer, search))
-      .catch(console.log)
+      .catch((e) => handleNetworkError(e, 'image'))
   }
 
   function fetchNYT(search) {
     fetch( `http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${search}&api-key=${nyt}`)
       .then((res) => res.json())
       .then((res) => addArticles(res, responseContainer))
-      .catch(console.log)
+      .catch((e) => handleNetworkError(e, 'article'))
+  }
+  function handleNetworkError(e, part) {
+    const errorTemplate = () => `
+      <p className="network-warning">Oh no! Problem making the request ${part}</p>
+    `
+    console.log(e)
+    responseContainer.insertAdjacentHTML('beforeend', errorTemplate())
   }
 })();
 
